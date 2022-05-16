@@ -5,7 +5,7 @@ public class Bill {
 	static List<bill_detail> billDetail = new ArrayList<bill_detail>();
 	 static Scanner s = new Scanner(System.in);
 	 static int bill_id=0;
-
+	 static int temp=0;
 	 static List<item_list> product_details = new ArrayList<item_list>();
 	 //String item_name,int item_id,int stack,int price
 	 
@@ -36,7 +36,8 @@ public class Bill {
 			System.out.println("2.Search Bill");
 			System.out.println("3.Search customer's Bill");
 			System.out.println("4.Items stack details");
-			System.out.println("5.Customer List");
+			System.out.println("5.Customer's Total Amount");
+			System.out.println("6.Search Item's Bill");
 			System.out.println("Enter option : ");
 			function_option=s.nextInt();
 			
@@ -48,10 +49,16 @@ public class Bill {
 				break;
 				
 			case 2:
-				search_bill();
+				if(temp!=0)
+					search_bill();
+				else
+					System.out.println("No bill exist.....");
 				break;
 			case 3:
-				search_customers_bill();
+				if(temp!=0)
+					search_customers_bill();
+				else
+					System.out.println("No bill exist.....");
 				break;
 			case 4:
 				stack_detail();
@@ -59,25 +66,34 @@ public class Bill {
 			case 5:
 				sales_detail();
 				break;
+			case 6:
+				if(temp!=0)
+					search_item_bill();
+				else
+					System.out.println("No bill exist.....");
+				break;
 			default:
 				System.out.println("Enter proper input....");	
 			}
-				System.out.println("If you want reapeat function pls press \'y\'");
+				System.out.println("If you want reapeat function...press \'y\'");
 				repeat_function=s.next().charAt(0);
 			}while(repeat_function=='y');
 	}
 	
 	public static void create_bill(){
 		char repeat_invoice;
-
+		
 		do {
 			int totprice=0;
 		
 			String name;
+			int item_id;
 			int qty;
 			int q_price;
 			int price;
+			
 			int opt;
+			
 			String cus_name="";
 			int cus_id=0;
 			char repeat_line;
@@ -87,12 +103,17 @@ public class Bill {
 			System.out.println("1.Shiv\n2.Saro\n3.Harish\n4.Kavis\n5.Vk");
 			System.out.println("Choose Customer :");
 			choose_customer=s.nextInt();
-			
+			if(choose_customer<=5) {
 			customer_list customer=customer_details.get(choose_customer-1);
 
 			cus_name=customer.customer_name;
 			cus_id=customer.customer_id;
-		
+			}
+			else
+			{
+				System.out.println("Enter proper input...");
+				return ;
+			}
 			
 			List<line_det> items_detail = new ArrayList<line_det>();
 
@@ -101,10 +122,12 @@ public class Bill {
 				System.out.println("1.Badam\n2.Kitkat\n3.Pen\n4.Horlicks\n5.Chips");
 				System.out.println("Enter product number :");
 				opt=s.nextInt();
+				if(opt<=5) {
 				item_list item = product_details.get(opt-1); 
 		
 				name=item.item_name;
 				price = item.price;
+				item_id=item.item_id;
 				System.out.println("Quantity");
 				qty = s.nextInt();
 				
@@ -112,18 +135,25 @@ public class Bill {
 				totprice = totprice + q_price;
 				item.stack=item.stack-qty;
 				
-				items_detail.add(new line_det(name,qty,price,q_price));
+				items_detail.add(new line_det(name,qty,price,q_price,item_id));
+				}
+				else
+				{
+					System.out.println("Enter proper input...");
 				
+				}
 				
-				System.out.println("If you want purchase another product..pls press \'y\'");
+				System.out.println("If you want purchase another product...press \'y\'");
 				repeat_line=s.next().charAt(0);
 			 }while(repeat_line=='y');
 			
 			 bill_id++;
 			 System.out.println("Customer Name : "+cus_name+"\t\t\t\tBill ID:" +bill_id);
-			 System.out.println("Customer Id : "+cus_id);
+			 System.out.println("Customer Id : "+cus_id+"\t\t\tDate : " +java.time.LocalDate.now());
+		        System.out.println();    
+
 			 System.out.println("----------------------------------------------------------------------------------------------------");  
-		     System.out.println("Product_Name  \tQuantity    \tRate    \tTotal Price");  
+		     System.out.println("Product_Name  \tItem id  \tQuantity    \tRate    \tTotal Price");  
 		     System.out.println("----------------------------------------------------------------------------------------------------");  
 			 for(line_det b : items_detail) {
 				 b.display();
@@ -133,12 +163,40 @@ public class Bill {
 			//int i=0;
 			 billDetail.add(new bill_detail(cus_name,cus_id,bill_id,totprice, items_detail));
 			
-			
-			System.out.println("Next customer....pls press \'y\'");
+			temp++;
+			System.out.println("Next customer....press \'y\'");
 			repeat_invoice=s.next().charAt(0);
 			 
 		}while(repeat_invoice=='y');
 	}
+	
+	
+	public static void search_item_bill() {
+		int search_item_id;
+		char search_bill_repeat;
+		do {
+		System.out.println("Enter item id : ");
+		search_item_id=s.nextInt();
+		int empty_bill=0;
+		
+		 for(bill_detail b : billDetail) {
+			 for(line_det c: b.line_items){
+				 if( c.item_id==search_item_id)
+				 {
+					 b.display_bill_detail();
+					 empty_bill++;
+				 }
+			 }
+		 }
+		 if(empty_bill==0)
+		 {
+			 System.out.println("No bill exist...");
+		 }
+		 System.out.println("If you want continue bill search ..press \'y\'");
+		 search_bill_repeat=s.next().charAt(0);
+		}while(search_bill_repeat=='y');
+	}
+	
 	
 	public static void sales_detail() {
 		System.out.println("Customer Name\t\tCustomer Id\t\tTotal sales Amount ");
@@ -155,10 +213,10 @@ public class Bill {
 	}
 	
 	public static void stack_detail() {
-		System.out.println("Item Name\t\tItem Stack");
+		System.out.println("Item Name\t\tItem Id\t\tItem Stack");
 		System.out.println("------------------------------------------------------------");
 		for(item_list b :product_details) {
-			System.out.println(b.item_name +"\t\t\t"+b.stack);
+			System.out.println(b.item_name +"\t\t\t"+b.item_id+"\t\t\t"+b.stack);
 		}
 	}
 	
@@ -168,12 +226,17 @@ public class Bill {
 		do {
 		System.out.println("Enter bill id : ");
 		search_bill_id=s.nextInt();
-		
+		int empty_bill=0;
 		 for(bill_detail b : billDetail) {
 			 if( b.bill_id==search_bill_id)
 			 {
 				 b.display_bill_detail();
+				 empty_bill++;
 			 }
+		 }
+		 if(empty_bill==0)
+		 {
+			 System.out.println("No bill exist...");
 		 }
 		 System.out.println("If you want continue bill search ..press \'y\'");
 		 search_bill_repeat=s.next().charAt(0);
@@ -186,12 +249,18 @@ public class Bill {
 		do {
 		System.out.println("Enter customer id : ");
 		search_cus_id=s.nextInt();
+		int empty_bill=0;
 		
 		 for(bill_detail b : billDetail) {
 			 if( b.cus_id==search_cus_id)
 			 {
 				 b.display_bill_detail();
+				 empty_bill++;
 			 }
+		 }
+		 if(empty_bill==0)
+		 {
+			 System.out.println("No bill exist...");
 		 }
 		 System.out.println("If you want continue bill search ..press \'y\'");
 		 search_bill_repeat=s.next().charAt(0);
@@ -203,10 +272,12 @@ class customer_list
 {
 	String customer_name;
 	int customer_id;
+	
 	customer_list(String customer_name,int customer_id)
 	{
 		this.customer_name=customer_name;
 		this.customer_id=customer_id;		
+		
 	}
 }
 class item_list{
@@ -228,18 +299,19 @@ class line_det
 	int quantity;
 	int price;
 	int totprice;
-	
-	line_det(String pname,int quantity,int price,int totprice)
+	int item_id;
+	line_det(String pname,int quantity,int price,int totprice,int item_id)
 	{
 		this.pname=pname;
 		this.quantity=quantity;
 		this.price=price;
 		this.totprice=totprice;
+		this.item_id=item_id;
 	}
 
 	public void display()
 	{
-		System.out.printf("%s \t\t %d \t\t %d \t\t %d\n",pname,quantity,price,totprice);
+		System.out.printf("%s \t\t %d \t\t %d \t\t %d \t\t %d\n",pname,item_id,quantity,price,totprice);
 	}
 }
 class bill_detail
@@ -264,7 +336,7 @@ class bill_detail
 		
 		System.out.println("-------------------------------------------------------------------------");  
 		System.out.printf(" Customer Name : %s\t\t\t\t\t Bill Id : %d\n",cus_name,bill_id);
-		System.out.printf(" Customer Id   : %d\n",cus_id);
+		System.out.print(" Customer Id   : "+cus_id+"\t\t\tDate :"+java.time.LocalDate.now());
 		System.out.println("-------------------------------------------------------------------------");  
 		System.out.println("Product_Name  \tQuantity    \tRate    \tTotal Price");  
 		System.out.println("-------------------------------------------------------------------------");  
